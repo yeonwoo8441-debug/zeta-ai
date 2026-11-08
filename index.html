@@ -1,0 +1,121 @@
+from pathlib import Path
+
+html = r'''<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#7868e6">
+<title>ZETA Unofficial Account</title>
+<style>
+:root{--bg:#f6f5ff;--card:#fff;--ink:#29263b;--muted:#77738d;--accent:#7868e6;--accent2:#a99cff;--line:#e9e6f5;--danger:#d94b69;--shadow:0 14px 40px #5546a51a}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#f4f1ff,#fff8fb 55%,#f2f7ff);font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;color:var(--ink);min-height:100vh}
+header{padding:22px 18px;text-align:center} .logo{font-size:25px;font-weight:900;letter-spacing:-1px;color:var(--accent)}.tag{font-size:12px;color:var(--muted);margin-top:5px}
+main{width:min(100% - 28px,480px);margin:12px auto 40px}.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:25px;box-shadow:var(--shadow)}
+h1{font-size:23px;margin:0 0 7px;letter-spacing:-.7px}.sub{font-size:13px;color:var(--muted);line-height:1.6;margin:0 0 22px}
+.tabs{display:flex;gap:8px;background:#f3f1fb;padding:5px;border-radius:14px;margin-bottom:22px}.tabs button{flex:1;border:0;border-radius:10px;padding:11px;background:transparent;color:var(--muted);font-weight:750}.tabs button.active{background:white;color:var(--accent);box-shadow:0 2px 8px #30206b12}
+label{display:block;font-size:13px;font-weight:750;margin:14px 0 7px}input,textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:13px 14px;font:inherit;font-size:14px;outline:none;background:#fff;color:var(--ink)}input:focus,textarea:focus{border-color:var(--accent2);box-shadow:0 0 0 3px #7868e61c}textarea{resize:vertical;min-height:76px}
+button{cursor:pointer;font:inherit}.primary{width:100%;border:0;border-radius:13px;padding:14px;margin-top:20px;background:linear-gradient(100deg,var(--accent),#9b83f1);color:#fff;font-weight:800}.primary:active{transform:scale(.99)}
+.small{font-size:12px;color:var(--muted);line-height:1.6}.notice{background:#f6f4ff;border:1px solid #e9e4ff;border-radius:13px;padding:12px;font-size:12px;color:#625a85;line-height:1.65;margin-top:16px}
+.msg{font-size:13px;margin-top:12px;min-height:20px;color:var(--danger)}.hidden{display:none!important}
+.profiletop{display:flex;align-items:center;gap:14px;margin:18px 0}.avatar{width:58px;height:58px;border-radius:20px;background:#eeeaff;display:grid;place-items:center;font-size:27px;overflow:hidden}.avatar img{width:100%;height:100%;object-fit:cover}.username{font-size:18px;font-weight:850}.handle{font-size:12px;color:var(--muted);margin-top:3px}
+.section{border-top:1px solid var(--line);padding-top:17px;margin-top:18px}.section h2{font-size:15px;margin:0 0 8px}.linkitem{border:1px solid var(--line);border-radius:13px;padding:12px;margin-top:9px;display:flex;justify-content:space-between;gap:8px;align-items:center}.linkitem a{color:var(--accent);font-size:13px;word-break:break-all}.linkitem button,.secondary{border:1px solid var(--line);background:white;border-radius:9px;padding:8px 10px;font-size:12px;color:var(--muted);white-space:nowrap}
+.actions{display:flex;gap:8px}.actions button{flex:1}.danger{color:var(--danger)!important}.footer{text-align:center;color:#9893aa;font-size:11px;margin:17px 0}
+@media(max-width:380px){.card{padding:19px}.actions{flex-direction:column}}
+</style>
+</head>
+<body>
+<header><div class="logo">ZETA <span style="color:#b6a9ff">UNOFFICIAL</span></div><div class="tag">나만의 독립 계정 · 제타 작품 링크 관리</div></header>
+<main>
+<section class="card" id="auth">
+<h1>환영합니다 👋</h1><p class="sub">제타 공식 계정과 별개로 사용하는 개인 계정 시스템입니다.</p>
+<div class="tabs"><button id="loginTab" class="active" type="button">로그인</button><button id="signupTab" type="button">회원가입</button></div>
+<form id="authForm">
+<div id="nameWrap" class="hidden"><label for="name">닉네임</label><input id="name" maxlength="24" placeholder="표시할 닉네임"></div>
+<label for="user">아이디</label><input id="user" autocomplete="username" minlength="4" maxlength="20" placeholder="4~20자 아이디" required>
+<label for="pass">비밀번호</label><input id="pass" type="password" autocomplete="current-password" minlength="6" placeholder="6자 이상" required>
+<div id="confirmWrap" class="hidden"><label for="confirm">비밀번호 확인</label><input id="confirm" type="password" minlength="6" placeholder="비밀번호 다시 입력"></div>
+<button class="primary" id="submitBtn" type="submit">로그인</button><div class="msg" id="authMsg" role="status"></div>
+</form>
+<div class="notice"><b>안내:</b> 이 파일은 브라우저 안에서만 작동하는 데모입니다. 계정은 현재 기기·브라우저에 저장되며 제타 공식 서버와 연결되거나 인증되지 않습니다. 실제 서비스 공개용으로 사용하려면 서버 기반 인증과 데이터베이스가 필요합니다.</div>
+</section>
+
+<section class="card hidden" id="dashboard">
+<h1>마이페이지</h1><p class="sub">내 프로필과 제타 작품 링크를 관리해 보세요.</p>
+<div class="profiletop"><div class="avatar" id="avatar">🌙</div><div><div class="username" id="displayName"></div><div class="handle" id="displayId"></div></div></div>
+<div class="section"><h2>프로필 설정</h2>
+<label for="editName">닉네임</label><input id="editName" maxlength="24" placeholder="닉네임">
+<label for="avatarUrl">프로필 이미지 주소 (선택)</label><input id="avatarUrl" type="url" placeholder="https://... 이미지 주소">
+<button class="secondary" id="saveProfile" style="margin-top:12px">프로필 저장</button>
+</div>
+<div class="section"><h2>제타 작품 링크 등록</h2>
+<label for="linkTitle">작품 이름</label><input id="linkTitle" maxlength="50" placeholder="예: 나의 캠핑 이야기">
+<label for="linkUrl">제타 작품 주소</label><input id="linkUrl" type="url" placeholder="https://zeta-ai.io/ko/plots/...">
+<button class="primary" id="addLink" style="margin-top:12px">링크 등록</button>
+<div id="links"></div>
+</div>
+<div class="section actions"><button class="secondary" id="logout">로그아웃</button><button class="secondary danger" id="deleteAccount">계정 삭제</button></div>
+<div class="msg" id="dashMsg" role="status"></div>
+</section>
+<div class="footer">ZETA UNOFFICIAL ACCOUNT · 비공식 개인용 데모</div>
+</main>
+<script>
+const KEY='zeta_unofficial_demo_v1';
+let mode='login', current=null;
+const $=id=>document.getElementById(id);
+function read(){try{return JSON.parse(localStorage.getItem(KEY)||'{"users":[]}')}catch{return {users:[]}}}
+function write(db){localStorage.setItem(KEY,JSON.stringify(db))}
+function cleanUser(s){return s.trim().toLowerCase()}
+function validUrl(s){try{const u=new URL(s);return u.protocol==='https:'||u.protocol==='http:'}catch{return false}}
+async function hashPassword(password,salt){
+  if(!crypto.subtle) throw new Error('이 브라우저에서는 보안 암호화 기능을 사용할 수 없습니다. HTTPS 환경에서 열어 주세요.');
+  const enc=new TextEncoder();
+  const key=await crypto.subtle.importKey('raw',enc.encode(password),'PBKDF2',false,['deriveBits']);
+  const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:enc.encode(salt),iterations:120000,hash:'SHA-256'},key,256);
+  return [...new Uint8Array(bits)].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+function setMode(next){mode=next;$('loginTab').classList.toggle('active',mode==='login');$('signupTab').classList.toggle('active',mode==='signup');$('nameWrap').classList.toggle('hidden',mode!=='signup');$('confirmWrap').classList.toggle('hidden',mode!=='signup');$('submitBtn').textContent=mode==='login'?'로그인':'회원가입';$('authMsg').textContent='';$('pass').value='';$('confirm').value=''}
+$('loginTab').onclick=()=>setMode('login');$('signupTab').onclick=()=>setMode('signup');
+$('authForm').addEventListener('submit',async e=>{
+ e.preventDefault();$('authMsg').textContent='';
+ const id=cleanUser($('user').value), pw=$('pass').value, db=read();
+ if(!/^[a-z0-9_.-]{4,20}$/.test(id)){ $('authMsg').textContent='아이디는 영문 소문자, 숫자, _, ., - 조합 4~20자로 입력해 주세요.';return}
+ if(pw.length<6){$('authMsg').textContent='비밀번호는 6자 이상이어야 합니다.';return}
+ try{
+  if(mode==='signup'){
+   if(pw!==$('confirm').value){$('authMsg').textContent='비밀번호가 서로 일치하지 않습니다.';return}
+   if(db.users.some(u=>u.id===id)){$('authMsg').textContent='이미 사용 중인 아이디입니다.';return}
+   const salt=crypto.randomUUID();const digest=await hashPassword(pw,salt);
+   db.users.push({id,name:$('name').value.trim()||id,salt,digest,avatar:'',links:[]});write(db);current=id;showDashboard();
+  }else{
+   const account=db.users.find(u=>u.id===id);
+   if(!account){$('authMsg').textContent='등록된 계정을 찾을 수 없습니다.';return}
+   const digest=await hashPassword(pw,account.salt);
+   if(digest!==account.digest){$('authMsg').textContent='아이디 또는 비밀번호가 올바르지 않습니다.';return}
+   current=id;showDashboard();
+  }
+ }catch(err){$('authMsg').textContent=err.message||'처리 중 오류가 발생했습니다.'}
+});
+function account(){return read().users.find(u=>u.id===current)}
+function updateAccount(fn){const db=read(),u=db.users.find(x=>x.id===current);if(!u)return;fn(u);write(db)}
+function showDashboard(){
+ if(!account())return; $('auth').classList.add('hidden');$('dashboard').classList.remove('hidden');render();
+}
+function render(){
+ const u=account();if(!u)return;
+ $('displayName').textContent=u.name;$('displayId').textContent='@'+u.id;$('editName').value=u.name;$('avatarUrl').value=u.avatar||'';
+ $('avatar').innerHTML=u.avatar&&validUrl(u.avatar)?'<img alt="프로필 이미지" src="'+u.avatar.replaceAll('"','&quot;')+'">':'🌙';
+ $('links').innerHTML='';
+ if(!u.links.length){$('links').innerHTML='<p class="small">아직 등록된 작품 링크가 없습니다.</p>';return}
+ u.links.forEach((item,i)=>{const row=document.createElement('div');row.className='linkitem';const info=document.createElement('div');const title=document.createElement('b');title.textContent=item.title;const a=document.createElement('a');a.href=item.url;a.target='_blank';a.rel='noopener noreferrer';a.textContent=item.url;info.append(title,document.createElement('br'),a);const del=document.createElement('button');del.textContent='삭제';del.onclick=()=>{updateAccount(x=>x.links.splice(i,1));render()};row.append(info,del);$('links').append(row)})
+}
+$('saveProfile').onclick=()=>{const name=$('editName').value.trim(),avatar=$('avatarUrl').value.trim();if(!name){$('dashMsg').textContent='닉네임을 입력해 주세요.';return}if(avatar&&!validUrl(avatar)){$('dashMsg').textContent='올바른 이미지 주소를 입력해 주세요.';return}updateAccount(u=>{u.name=name;u.avatar=avatar});$('dashMsg').textContent='프로필을 저장했습니다.';render()};
+$('addLink').onclick=()=>{const title=$('linkTitle').value.trim(),url=$('linkUrl').value.trim();if(!title||!validUrl(url)){$('dashMsg').textContent='작품 이름과 올바른 http(s) 주소를 입력해 주세요.';return}updateAccount(u=>u.links.push({title,url}));$('linkTitle').value='';$('linkUrl').value='';$('dashMsg').textContent='작품 링크를 등록했습니다.';render()};
+$('logout').onclick=()=>{current=null;$('dashboard').classList.add('hidden');$('auth').classList.remove('hidden');$('user').value='';$('pass').value='';setMode('login')};
+$('deleteAccount').onclick=()=>{if(!confirm('이 브라우저에 저장된 계정을 정말 삭제할까요?'))return;const db=read();db.users=db.users.filter(u=>u.id!==current);write(db);current=null;$('dashboard').classList.add('hidden');$('auth').classList.remove('hidden');setMode('signup');$('authMsg').textContent='계정이 이 브라우저에서 삭제되었습니다.'};
+</script>
+</body>
+</html>'''
+path = Path("/mnt/data/zeta_unofficial_account.html")
+path.write_text(html, encoding="utf-8")
+print(f"생성 완료: {path} ({path.stat().st_size:,} bytes)")
